@@ -4,35 +4,35 @@
 #-----------------------------------------------------------------------------#
 substitutions:
   # Project Specific Substitutions
-  sub_text_devicename:            "Propane Tank Sensor" 
-  sub_esphome_name:               propanetanksensor
-  #sub_wifi_manual_ip_static_ip:   !secret esp_propane_sensor_ip
-  sub_esphome_platform:           esp32
-  sub_esphome_board:              esp32dev
-  sub_framework_type:             arduino
-  sub_sensor1_mac:                "F6:CC:9C:06:F6:F9"
-  sub_sensor1_name:               "Curbside Propane Tank"
-  sub_sensor1_id:                 "curbside_propane_tank"
-  sub_sensor2_mac:                "CC:9C:31:1E:75:8D"
-  sub_sensor2_name:               "Streetside Propane Tank"
-  sub_sensor2_id:                 "streetside_propane_tank"
+  sub_text_devicename:                        "Propane Tank Sensor" 
+  sub_esphome_name:                           propanetanksensor
+  #sub_wifi_manual_ip_static_ip:               !secret esp_propane_sensor_ip
+  sub_esphome_platform:                       esp32
+  sub_esphome_board:                          esp32dev
+  sub_framework_type:                         arduino
+  sub_sensor1_mac:                            "F6:CC:9C:06:F6:F9"
+  sub_sensor1_name:                           "Curbside Propane Tank"
+  sub_sensor1_id:                             "curbside_propane_tank"
+  sub_sensor2_mac:                            "CC:9C:31:1E:75:8D"
+  sub_sensor2_name:                           "Streetside Propane Tank"
+  sub_sensor2_id:                             "streetside_propane_tank"
 
     # Network and service related substitutions
-  sub_wifi_ssid1:                 !secret esp_wifi_ssid1
-  sub_wifi_password1:             !secret esp_wifi_pass1
-  sub_wifi_manual_ip_subnet:      !secret esp_ip_subnet
-  sub_wifi_manual_ip_gateway:     !secret esp_ip_gateway
-  sub_wifi_manual_ip_dns1:        !secret esp_ip_dns
+  sub_wifi_ssid1:                             !secret esp_wifi_ssid1
+  sub_wifi_password1:                         !secret esp_wifi_pass1
+  sub_wifi_manual_ip_subnet:                  !secret esp_ip_subnet
+  sub_wifi_manual_ip_gateway:                 !secret esp_ip_gateway
+  sub_wifi_manual_ip_dns1:                    !secret esp_ip_dns
   # Fast connect is only available when a single SSID is used.  True or False
-  sub_wifi_fast_connect:          "true"                  
-  sub_wifi_domain:                !secret esp_ip_domain
-  sub_wifi_ap_password:           !secret esp_ap_psk
-  sub_web_server_port:            !secret esp_http_server_port
-  sub_web_server_auth_user:       !secret esp_http_user
-  sub_web_server_auth_password:   !secret esp_http_pass
-  sub_api_password:               !secret esp_api_pass
-  sub_ota_safe_mode:              "true"
-  sub_ota_password:               !secret esp_ota_pass
+  sub_wifi_fast_connect:                      "true"                  
+  sub_wifi_domain:                            !secret esp_ip_domain
+  sub_wifi_ap_password:                       !secret esp_ap_psk
+  sub_web_server_port:                        !secret esp_http_server_port
+  sub_web_server_auth_user:                   !secret esp_http_user
+  sub_web_server_auth_password:               !secret esp_http_pass
+  sub_api_password:                           !secret esp_api_pass
+  sub_ota_safe_mode:                          "true"
+  sub_ota_password:                           !secret esp_ota_pass
 
 
 #*****************************************************************************#
@@ -40,39 +40,39 @@ substitutions:
 #-----------------------------------------------------------------------------#
 
 esphome:
-  name:                           ${sub_esphome_name}
+  name:                                       ${sub_esphome_name}
   on_boot:                          
     priority:                                 -100
     then:
       script.execute:                         on_boot
 
 esp32:
-  board:                ${sub_esphome_board}
+  board:                                      ${sub_esphome_board}
   framework:
-    type:               ${sub_framework_type}
+    type:                                     ${sub_framework_type}
 
 #*****************************************************************************#
 #                                  WiFi Component                             #
 #-----------------------------------------------------------------------------#
 wifi:
-  networks:
-    - ssid:             ${sub_wifi_ssid1}
-      password:         ${sub_wifi_password1}
-  fast_connect:         ${sub_wifi_fast_connect}
-  domain:               ${sub_wifi_domain}
-  ap:                                   # Enable fallback hotspot
-    ssid:               ${sub_text_devicename} Hotspot
-    password:           ${sub_wifi_ap_password}
+  networks: 
+    - ssid:                                   ${sub_wifi_ssid1}
+      password:                               ${sub_wifi_password1}
+  fast_connect:                               ${sub_wifi_fast_connect}
+  domain:                                     ${sub_wifi_domain}
+  ap:                                         # Enable fallback hotspot
+    ssid:                                     ${sub_text_devicename} Hotspot
+    password:                                 ${sub_wifi_ap_password}
 
 
 #*****************************************************************************#
 #                            Web Server Component                             #
 #-----------------------------------------------------------------------------# 
 web_server: 
-  port:                 ${sub_web_server_port}
+  port:                                       ${sub_web_server_port}
   auth:
-    username:           ${sub_web_server_auth_user}
-    password:           ${sub_web_server_auth_password}
+    username:                                 ${sub_web_server_auth_user}
+    password:                                 ${sub_web_server_auth_password}
 
 #*****************************************************************************#
 #                            Captive Portal Component                         #
@@ -83,7 +83,7 @@ captive_portal:
 #                               API Component                                 #
 #-----------------------------------------------------------------------------#
 api:
-  password:             ${sub_api_password}
+  password:                                   ${sub_api_password}
 #*****************************************************************************#
 #                               Logger Component                              #
 #-----------------------------------------------------------------------------#
@@ -94,8 +94,8 @@ logger:
 #                               OTA Update Component                          #
 #-----------------------------------------------------------------------------#
 ota:
-  safe_mode:            ${sub_ota_safe_mode}
-  password:             ${sub_ota_password}
+  safe_mode:                                  ${sub_ota_safe_mode}
+  password:                                   ${sub_ota_password}
 
 #*****************************************************************************#
 #                               SPI Component                                 #
@@ -182,11 +182,11 @@ script:
 button:
     # Include a switch that can be used to reboot the device
 
-  - platform:                 template
-    name:                     "Restart ${sub_text_devicename}"
+  - platform:                                 template
+    name:                                     "Restart ${sub_text_devicename}"
     on_press:
       then:
-        - switch.toggle:      platform_restart
+        - switch.toggle:                      platform_restart
 
 #*****************************************************************************#
 #                                  Sensors                                    #
@@ -199,51 +199,51 @@ sensor:
     entity_category:                          diagnostic
     update_interval:                          30s
 
-  - platform:           mopeka_pro_check
-    mac_address:        ${sub_sensor1_mac}
-    tank_type:          30LB_V
+  - platform:                                 mopeka_pro_check
+    mac_address:                              ${sub_sensor1_mac}
+    tank_type:                                30LB_V
     temperature:
-      name:             ${sub_sensor1_name} Temp
+      name:                                   ${sub_sensor1_name} Temp
     level:
-      name:             ${sub_sensor1_name} Level
+      name:                                   ${sub_sensor1_name} Level
     distance:
-      name:             ${sub_sensor1_name} Distance
+      name:                                   ${sub_sensor1_name} Distance
     battery_level:
-      name:             ${sub_sensor1_name} Battery
+      name:                                   ${sub_sensor1_name} Battery
 
-  - platform:           mopeka_pro_check
-    mac_address:        ${sub_sensor2_mac}
-    tank_type:          30LB_V
+  - platform:                                 mopeka_pro_check
+    mac_address:                              ${sub_sensor2_mac}
+    tank_type:                                30LB_V
     temperature:
-      name:             ${sub_sensor2_name} Temp
+      name:                                   ${sub_sensor2_name} Temp
     level:
-      name:             ${sub_sensor2_name} Level
+      name:                                   ${sub_sensor2_name} Level
     distance:
-      name:             ${sub_sensor2_name} Distance
+      name:                                   ${sub_sensor2_name} Distance
     battery_level:
-      name:             ${sub_sensor2_name} Battery
+      name:                                   ${sub_sensor2_name} Battery
   
-  - platform:           ble_rssi
-    mac_address:        ${sub_sensor1_mac}
-    name:               Sensor 1 BLE RSSI
-    entity_category:    diagnostic
-    icon:               mdi:signal
+  - platform:                                 ble_rssi
+    mac_address:                              ${sub_sensor1_mac}
+    name:                                     Sensor 1 BLE RSSI
+    entity_category:                          diagnostic
+    icon:                                     mdi:signal
   
-  - platform:           ble_rssi
-    mac_address:        ${sub_sensor2_mac}
-    name:               Sensor 2 BLE RSSI
-    entity_category:    diagnostic
-    icon:               mdi:signal
+  - platform:                                 ble_rssi
+    mac_address:                              ${sub_sensor2_mac}
+    name:                                     Sensor 2 BLE RSSI
+    entity_category:                          diagnostic
+    icon:                                     mdi:signal
 
 esp32_ble_tracker:
 
 
 ble_client:
-  - mac_address:        ${sub_sensor1_mac}
-    id:                 ${sub_sensor1_id} 
+  - mac_address:                              ${sub_sensor1_mac}
+    id:                                       ${sub_sensor1_id} 
   
-  - mac_address:        ${sub_sensor2_mac}
-    id:                 ${sub_sensor2_id} 
+  - mac_address:                              ${sub_sensor2_mac}
+    id:                                       ${sub_sensor2_id} 
 
 #*****************************************************************************#
 #                                Text-Sensors                                 #
