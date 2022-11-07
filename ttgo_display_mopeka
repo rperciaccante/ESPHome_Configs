@@ -1,0 +1,449 @@
+#-----------------------------------------------------------------------------#
+#                         Substitution Component                              #
+#       https://esphome.io/guides/configuration-types.html#substitutions      #
+#-----------------------------------------------------------------------------#
+substitutions:
+  # Project Specific Substitutions
+  sub_text_devicename:            "Propane Tank Sensor" 
+  sub_esphome_name:               propanetanksensor
+  #sub_wifi_manual_ip_static_ip:   !secret esp_propane_sensor_ip
+  sub_esphome_platform:           esp32
+  sub_esphome_board:              esp32dev
+  sub_framework_type:             arduino
+  sub_sensor1_mac:                "F6:CC:9C:06:F6:F9"
+  sub_sensor1_name:               "Curbside Propane Tank"
+  sub_sensor1_id:                 "curbside_propane_tank"
+  sub_sensor2_mac:                "CC:9C:31:1E:75:8D"
+  sub_sensor2_name:               "Streetside Propane Tank"
+  sub_sensor2_id:                 "streetside_propane_tank"
+
+    # Network and service related substitutions
+  sub_wifi_ssid1:                 !secret esp_wifi_ssid1
+  sub_wifi_password1:             !secret esp_wifi_pass1
+  sub_wifi_manual_ip_subnet:      !secret esp_ip_subnet
+  sub_wifi_manual_ip_gateway:     !secret esp_ip_gateway
+  sub_wifi_manual_ip_dns1:        !secret esp_ip_dns
+  # Fast connect is only available when a single SSID is used.  True or False
+  sub_wifi_fast_connect:          "true"                  
+  sub_wifi_domain:                !secret esp_ip_domain
+  sub_wifi_ap_password:           !secret esp_ap_psk
+  sub_web_server_port:            !secret esp_http_server_port
+  sub_web_server_auth_user:       !secret esp_http_user
+  sub_web_server_auth_password:   !secret esp_http_pass
+  sub_api_password:               !secret esp_api_pass
+  sub_ota_safe_mode:              "true"
+  sub_ota_password:               !secret esp_ota_pass
+
+
+#*****************************************************************************#
+#                  https://esphome.io/components/esphome.html                 #
+#-----------------------------------------------------------------------------#
+
+esphome:
+  name:                           ${sub_esphome_name}
+  on_boot:                          
+    priority:                                 -100
+    then:
+      script.execute:                         on_boot
+
+esp32:
+  board:                ${sub_esphome_board}
+  framework:
+    type:               ${sub_framework_type}
+
+#*****************************************************************************#
+#                                  WiFi Component                             #
+#-----------------------------------------------------------------------------#
+wifi:
+  networks:
+    - ssid:             ${sub_wifi_ssid1}
+      password:         ${sub_wifi_password1}
+  fast_connect:         ${sub_wifi_fast_connect}
+  domain:               ${sub_wifi_domain}
+  ap:                                   # Enable fallback hotspot
+    ssid:               ${sub_text_devicename} Hotspot
+    password:           ${sub_wifi_ap_password}
+
+
+#*****************************************************************************#
+#                            Web Server Component                             #
+#-----------------------------------------------------------------------------# 
+web_server: 
+  port:                 ${sub_web_server_port}
+  auth:
+    username:           ${sub_web_server_auth_user}
+    password:           ${sub_web_server_auth_password}
+
+#*****************************************************************************#
+#                            Captive Portal Component                         #
+#-----------------------------------------------------------------------------#
+captive_portal:
+
+#*****************************************************************************#
+#                               API Component                                 #
+#-----------------------------------------------------------------------------#
+api:
+  password:             ${sub_api_password}
+#*****************************************************************************#
+#                               Logger Component                              #
+#-----------------------------------------------------------------------------#
+
+logger:
+
+#*****************************************************************************#
+#                               OTA Update Component                          #
+#-----------------------------------------------------------------------------#
+ota:
+  safe_mode:            ${sub_ota_safe_mode}
+  password:             ${sub_ota_password}
+
+#*****************************************************************************#
+#                               SPI Component                                 #
+#-----------------------------------------------------------------------------#
+
+spi:
+  clk_pin:                                    GPIO18
+  mosi_pin:                                   GPIO19
+
+#*****************************************************************************#
+#                                  Fonts                                      #
+#-----------------------------------------------------------------------------#
+
+font:
+  - file:                                     "fonts/CooperBlack.ttf"
+    id:                                       cooperblack_10
+    size:                                     10
+  # ----------------------------------------------------------------
+  - file:                                     "fonts/CooperBlack.ttf"
+    id:                                       cooperblack_15
+    size:                                     15
+  # ----------------------------------------------------------------
+  - file:                                     "fonts/CooperBlack.ttf"
+    id:                                       cooperblack_20
+    size:                                     20
+  # ----------------------------------------------------------------
+  - file:                                     "fonts/CooperBlack.ttf"
+    id:                                       netinfo
+    size:                                     18
+
+#*****************************************************************************#
+#                                  Colors                                      #
+#-----------------------------------------------------------------------------#
+
+color:
+  - id:                                       my_red
+    red:                                      100%
+    green:                                    0%
+    blue:                                     0%
+  # ----------------------------------------------------------------
+  - id:                                       my_yellow
+    red:                                      100%
+    green:                                    100%
+    blue:                                     0%
+  # ----------------------------------------------------------------
+  - id:                                       my_green
+    red:                                      0%
+    green:                                    100%
+    blue:                                     0%
+  # ----------------------------------------------------------------
+  - id:                                       my_blue
+    red:                                      0%
+    green:                                    0%
+    blue:                                     100%
+  # ----------------------------------------------------------------
+  - id:                                       my_gray
+    red:                                      50%
+    green:                                    50%
+    blue:                                     50%
+
+#*****************************************************************************#
+#                                  Scripts                                    #
+#-----------------------------------------------------------------------------#
+
+script:
+  - id:                                       on_boot
+    then:
+      - logger.log:                           "System bootup underway..."
+      - switch.turn_on:                       backlight
+      - switch.turn_off:                      pauseRotation
+  # ----------------------------------------------------------------
+  - id:                                       screentimer
+    mode:                                     restart
+    then:
+      - delay:                                60s
+      - logger.log:                           "Screen timeout reached"
+      - switch.turn_off:                      backlight
+      - switch.turn_on:                       pauseRotation
+
+#*****************************************************************************#
+#                                  Buttons                                    #
+#-----------------------------------------------------------------------------#
+
+button:
+    # Include a switch that can be used to reboot the device
+
+  - platform:                 template
+    name:                     "Restart ${sub_text_devicename}"
+    on_press:
+      then:
+        - switch.toggle:      platform_restart
+
+#*****************************************************************************#
+#                                  Sensors                                    #
+#-----------------------------------------------------------------------------#
+
+sensor:
+  - platform:                                 wifi_signal              
+    name:                                     ${sub_esphome_name} WiFi Signal
+    id:                                       ${sub_esphome_name}_wifi_signal
+    entity_category:                          diagnostic
+    update_interval:                          30s
+
+  - platform:           mopeka_pro_check
+    mac_address:        ${sub_sensor1_mac}
+    tank_type:          30LB_V
+    temperature:
+      name:             ${sub_sensor1_name} Temp
+    level:
+      name:             ${sub_sensor1_name} Level
+    distance:
+      name:             ${sub_sensor1_name} Distance
+    battery_level:
+      name:             ${sub_sensor1_name} Battery
+
+  - platform:           mopeka_pro_check
+    mac_address:        ${sub_sensor2_mac}
+    tank_type:          30LB_V
+    temperature:
+      name:             ${sub_sensor2_name} Temp
+    level:
+      name:             ${sub_sensor2_name} Level
+    distance:
+      name:             ${sub_sensor2_name} Distance
+    battery_level:
+      name:             ${sub_sensor2_name} Battery
+  
+  - platform:           ble_rssi
+    mac_address:        ${sub_sensor1_mac}
+    name:               Sensor 1 BLE RSSI
+    entity_category:    diagnostic
+    icon:               mdi:signal
+  
+  - platform:           ble_rssi
+    mac_address:        ${sub_sensor2_mac}
+    name:               Sensor 2 BLE RSSI
+    entity_category:    diagnostic
+    icon:               mdi:signal
+
+esp32_ble_tracker:
+
+
+ble_client:
+  - mac_address:        ${sub_sensor1_mac}
+    id:                 ${sub_sensor1_id} 
+  
+  - mac_address:        ${sub_sensor2_mac}
+    id:                 ${sub_sensor2_id} 
+
+#*****************************************************************************#
+#                                Text-Sensors                                 #
+#-----------------------------------------------------------------------------#
+
+text_sensor:
+  - platform:                                 wifi_info                  # https://esphome.io/components/text_sensor/wifi_info.html
+    ip_address:
+      name:                                   IP Address
+      id:                                     host_ip
+      entity_category:                        diagnostic
+      icon:                                   mdi:fingerprint
+    ssid:
+      name:                                   Connected SSID
+      id:                                     host_ssid
+      entity_category:                        diagnostic
+      icon:                                   mdi:router-wireless
+  # ----------------------------------------------------------------
+  - platform:                                 template                   # https://www.arduino.cc/en/Reference/WiFi
+    id:                                       host_mac
+    name:                                     "MAC Address"
+    entity_category:                          diagnostic
+    lambda:                                   'return {WiFi.macAddress().c_str()};'
+    icon:                                     mdi:fingerprint
+    update_interval:                          1d
+  # ----------------------------------------------------------------
+  - platform:                                 template
+    name:                                     ${sub_sensor1_name} MAC
+    id:                                       ${sub_sensor1_id}_mac
+    entity_category:                          diagnostic
+    icon:                                     mdi:fingerprint
+  # ----------------------------------------------------------------
+  - platform:                                 template
+    name:                                     ${sub_sensor2_name} MAC
+    id:                                       ${sub_sensor2_id}_mac
+    entity_category:                          diagnostic
+    icon:                                     mdi:fingerprint
+
+#*****************************************************************************#
+#                                  Switches                                   #
+#-----------------------------------------------------------------------------#
+
+switch:
+  - platform:                                 gpio
+    pin:                                      GPIO4
+    name:                                     "Backlight"
+    id:                                       backlight
+  # ----------------------------------------------------------------
+  - platform:                                 template
+    name:                                     "pauseRotation"
+    id:                                       pauseRotation
+    optimistic:                               true
+  # ----------------------------------------------------------------
+      # Include a switch that can be used to reboot the device
+  - platform:                                 restart
+    id:                                       platform_restart
+    internal:                                 true
+    icon:                                     mdi:power
+
+#*****************************************************************************#
+#                                  Binary Sensors                             #
+#-----------------------------------------------------------------------------#
+
+binary_sensor:
+  - platform:                                 status
+    name:                                     "Node Status"
+    id:                                       system_status
+  # ----------------------------------------------------------------
+  - platform:                                 gpio
+    pin:
+      number:                                 GPIO0
+      inverted:                               true
+      mode:
+        input:                                true
+        pullup:                               true
+    name:                                     "Page Next"
+    id:                                       pageNext
+    internal:                                 true
+    on_click:
+    - min_length:                             50ms
+      max_length:                             350ms
+      then:
+        - script.execute:                     screentimer
+        - switch.turn_on:                     backlight
+        - display.page.show_next:             my_display
+        - component.update:                   my_display
+    - min_length:                             1000ms
+      max_length:                             2000ms
+      then:
+        - switch.toggle:                      pauseRotation
+        - switch.turn_on:                     backlight
+        - component.update:                   my_display
+  # ----------------------------------------------------------------
+  - platform:                                 gpio
+    pin:
+      number:                                 GPIO35
+      inverted:                               true
+    name:                                     "Screen"
+    id:                                       screen
+    internal:                                 true
+    on_click:
+    - min_length:                             50ms
+      max_length:                             350ms
+      then:
+        - script.execute:                     screentimer
+        - switch.toggle:                      backlight
+        - component.update:                   my_display
+
+#*****************************************************************************#
+#                                  Graphs                                     #
+#-----------------------------------------------------------------------------#
+
+graph:
+  # Show bare-minimum auto-ranged graph
+  - id:                                       wireless_signal
+    sensor:                                   ${sub_esphome_name}_wifi_signal
+    line_type:                                solid
+    line_thickness:                           1
+    color:                                    my_green
+    duration:                                 10min #1h
+    width:                                    240
+    height:                                   100
+
+#*****************************************************************************#
+#                                  Display                                    #
+#-----------------------------------------------------------------------------#
+
+display:
+  - platform:                                 st7789v
+    model:                                    TTGO TDisplay 135x240
+    backlight_pin:                            GPIO4
+    cs_pin:                                   GPIO5
+    dc_pin:                                   GPIO16
+    reset_pin:                                GPIO23
+    id:                                       my_display
+    rotation:                                 90
+    pages:
+      - id:                                   page1
+        lambda: |-
+          if (id(pauseRotation).state == 1) {
+            it.printf(235,5, id(cooperblack_10), id(my_red), TextAlign::RIGHT, "(paused)");
+          }
+          it.rectangle(0,  0, it.get_width(), it.get_height(), id(my_blue));
+          it.rectangle(0, 35, it.get_width(), it.get_height(), id(my_blue));
+          it.print(120, 5, id(cooperblack_20), id(my_yellow), TextAlign::CENTER_HORIZONTAL, "ESPHome");
+          
+      - id:                                   page2
+        lambda: |-
+          if (id(pauseRotation).state == 1) {
+            it.printf(235,5, id(cooperblack_10), id(my_red), TextAlign::RIGHT, "(paused)");
+          }
+          it.rectangle(0,  0, it.get_width(), it.get_height(), id(my_blue));
+          it.rectangle(0, 35, it.get_width(), it.get_height(), id(my_blue));
+          it.print(120, 5, id(cooperblack_20), id(my_green), TextAlign::CENTER_HORIZONTAL, "Page 2");
+
+      - id:                                   page3
+        lambda: |-
+          if (id(pauseRotation).state == 1) {
+            it.printf(235,5, id(cooperblack_10), id(my_red), TextAlign::RIGHT, "(paused)");
+          }
+          it.rectangle(0,  0, it.get_width(), it.get_height(), id(my_blue));
+          it.rectangle(0, 35, it.get_width(), it.get_height(), id(my_blue));
+          it.print(120, 5, id(cooperblack_20), id(my_red), TextAlign::CENTER_HORIZONTAL, "Page 3");
+
+      - id:                                   page4
+        lambda: |-
+          if (id(pauseRotation).state == 1) {
+            it.printf(235,5, id(cooperblack_10), id(my_red), TextAlign::RIGHT, "(paused)");
+          }
+          it.rectangle(0,  0, it.get_width(), it.get_height(), id(my_blue));
+          it.rectangle(0, 35, it.get_width(), it.get_height(), id(my_blue));
+          it.print(120, 5, id(netinfo), id(my_red), TextAlign::CENTER_HORIZONTAL, "Network Info");
+          it.printf(5, 40, id(netinfo), "IP:");
+          it.printf(235, 40, id(netinfo), TextAlign::RIGHT, "%s", id(host_ip).state.c_str());
+          it.printf(5, 55, id(netinfo), "SSID:");
+          it.printf(235, 55, id(netinfo), TextAlign::RIGHT, "%s", id(host_ssid).state.c_str());
+          it.printf(5, 70, id(netinfo), "RSSI:");
+          it.printf(235, 70, id(netinfo), TextAlign::RIGHT, "%.f dbm", id(${sub_esphome_name}_wifi_signal).state);
+          it.printf(5, 85, id(netinfo), "MAC:");
+          it.printf(235,85, id(netinfo), TextAlign::RIGHT, "%s", id(host_mac).state.c_str());
+      
+      - id:                                   page5
+        lambda: |-
+          if (id(pauseRotation).state == 1) {
+            it.printf(235,5, id(cooperblack_10), id(my_red), TextAlign::RIGHT, "(paused)");
+          }
+          it.rectangle(0, 0, it.get_width(), 35, id(my_blue));
+          it.print(120, 5, id(cooperblack_20), id(my_red), TextAlign::CENTER_HORIZONTAL, "Wireless Signal");
+          it.graph(0, 35, id(wireless_signal),my_blue);
+          
+#*****************************************************************************#
+#                                  Interval                                   #
+#-----------------------------------------------------------------------------#
+
+interval:
+  - interval:                                 5s
+    then:
+      if:
+        condition:                 
+          switch.is_off:                      pauseRotation
+        then:
+          - display.page.show_next:           my_display
+          - component.update:                 my_display
